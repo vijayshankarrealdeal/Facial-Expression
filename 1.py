@@ -14,7 +14,7 @@ for i in range(len(X)):
     for j in range(2304):
         c[i][j] = q[j]
 
-X = c.reshape(len(X),48,48,1)
+X = c.reshape(-1,48,48,1)
 from sklearn.model_selection import train_test_split
 x_train,x_test,y_train,y_test = train_test_split(X,y,test_size = 0.23,random_state = 0)
 x_train = x_train/255.0
