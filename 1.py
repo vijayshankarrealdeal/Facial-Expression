@@ -51,8 +51,22 @@ classifier.add(Dense(units = 1,activation="sigmoid"))
 
 classifier.compile(optimizer='adam',loss = 'binary_crossentropy',metrics = ['accuracy'])
 
+datagen = ImageDataGenerator(
+    featurewise_center=False,  
+    samplewise_center=False,  
+    featurewise_std_normalization=False,  
+    samplewise_std_normalization=False,  
+    zca_whitening=False,  
+    rotation_range=10,
+    zoom_range = 0.1, 
+    width_shift_range=0.1, 
+    height_shift_range=0.1,
+    horizontal_flip=False, 
+    vertical_flip=False)
 
-history = classifier.fit(x_train,y_train, epochs=10, batch_size=32,validation_data=(x_test,y_test))
+datagen.fit(x_train)
+
+history = classifier.fit(datagen.flow(x_train,y_train), epochs=10, batch_size=32,validation_data=(x_test,y_test))
 
 
 
