@@ -1,57 +1,81 @@
-import numpy as np
 import pandas as pd
-import  matplotlib.pyplot as plt
+import numpy as np
 
-dataset = pd.read_csv("fer2013.csv")
+dataset = pd.read_csv('/content/dataa/fer2013/fer2013.csv')
 
-X = dataset.iloc[:,1:2].values
+y_train = dataset['emotion'].values
+x_train = dataset['pixels'].values
+usage   = dataset['Usage']
+import seaborn as sns
 
-y = dataset.iloc[:,0].values
+sns.countplot(y_train)
 
-c = np.zeros([35887,2304])
-for i in range(len(X)):
-    q = X[i][0].split(" ")
-    for j in range(2304):
-        c[i][j] = q[j]
+X_train = []
+for i in range(len(x_train)):
+  X_train.append(x_train[i].split(' '))
 
-X = c.reshape(-1,48,48,1)
-from sklearn.model_selection import train_test_split
-x_train,x_test,y_train,y_test = train_test_split(X,y,test_size = 0.23,random_state = 0)
-x_train = x_train/255.0
-x_test = x_test/255.0
+X_train = np.array(X_train,dtype = 'float32')
 
+X_train = X_train/255.0
+X_train =X_train.reshape(-1,48,48,1)
 
-from keras import Sequential
-from keras.layers import Conv2D
-from keras.layers import Flatten
+import matplotlib.pyplot as plt
+
+plt.imshow(X_train[207][:,:,0])
+
+from keras.utils import to_categorical
+y_train = to_categorical(y_train)
+
+from sklearn.model_selection import  train_test_split
+X_train, X_val, Y_train,Y_val = train_test_split(X_train, y_train, test_size = 0.23, random_state=0)
+
+from keras.models import Sequential
 from keras.layers import Dense
 from keras.layers import MaxPooling2D
-from keras.optimizers import SGD
+from keras.layers import Conv2D
+from keras.layers import Flatten
+from keras.optimizers import Adam
 from keras.layers import Dropout
+
 from keras.preprocessing.image import ImageDataGenerator
+from keras.callbacks import ReduceLROnPlateau 
 
 
+model = Sequential()
+model.add(Conv2D(filters=32,kernel_size=(3,3) ,padding="Same",activation="relu",input_shape=(48,48,1)))
+model.add(Conv2D(filters=32,kernel_size=(3,3) ,padding="Same",activation="relu"))
+model.add(MaxPooling2D(pool_size=(2,2)))
+model.add(Dropout(0.25))
+
+model.add(Conv2D(filters = 64, kernel_size = (3,3),padding = 'Same', activation ='relu'))
+model.add(Conv2D(filters = 64, kernel_size = (3,3),padding = 'Same', activation ='relu'))
+model.add(MaxPooling2D(pool_size=(2,2), strides=(2,2)))
+model.add(Dropout(0.25))
+
+model.add(Conv2D(filters = 64, kernel_size = (3,3),padding = 'Same', activation ='relu'))
+model.add(Conv2D(filters = 64, kernel_size = (3,3),padding = 'Same', activation ='relu'))
+model.add(MaxPooling2D(pool_size=(2,2), strides=(2,2)))
+model.add(Dropout(0.25))
+
+model.add(Conv2D(filters = 64, kernel_size = (3,3),padding = 'Same', activation ='relu'))
+model.add(Conv2D(filters = 64, kernel_size = (3,3),padding = 'Same', activation ='relu'))
+model.add(MaxPooling2D(pool_size=(2,2), strides=(2,2)))
+model.add(Dropout(0.25))
+
+model.add(Flatten())
+model.add(Dense(128, activation = "relu"))
+model.add(Dropout(0.5))
+model.add(Dense(7, activation = "softmax"))
+optimizer = Adam()
+
+model.compile(optimizer, loss = "categorical_crossentropy",metrics=["accuracy"])
 
 
-classifier = Sequential()
-
-classifier.add(Conv2D(64,(3,3) , input_shape = (48,48,1),activation='relu',))
-
-classifier.add(MaxPooling2D(pool_size = (2,2)))
-
-classifier.add(Conv2D(64,(3,3) ,activation='relu',))
-
-classifier.add(MaxPooling2D(pool_size = (2,2)))
-
-classifier.add(Flatten())
-
-classifier.add(Dense(units = 128,activation='relu'))
-
-classifier.add(Dense(units = 1,activation="sigmoid"))
-
-
-classifier.compile(optimizer='adam',loss = 'binary_crossentropy',metrics = ['accuracy'])
-
+learning_rate_reduction = ReduceLROnPlateau(monitor="val_loss",
+                                            patience=1, 
+                                            verbose=1, 
+                                            factor=0.5, 
+                                            min_lr=0.0001)
 datagen = ImageDataGenerator(
     featurewise_center=False,  
     samplewise_center=False,  
@@ -65,21 +89,38 @@ datagen = ImageDataGenerator(
     horizontal_flip=False, 
     vertical_flip=False)
 
-datagen.fit(x_train)
+datagen.fit(X_train)
 
-history = classifier.fit(datagen.flow(x_train,y_train), epochs=3, batch_size=32,validation_data=(x_test,y_test))
+epochs = 425
+batch_size = 86
 
+history = model.fit(
+    datagen.flow(X_train,Y_train),
+    batch_size=batch_size,
+    validation_data = (X_val,Y_val),
+    epochs = epochs,
+    verbose = 1,
+    shuffle = True,
+    callbacks=[learning_rate_reduction],
+    steps_per_epoch=X_train.shape[0]//batch_size,
+)
+loss_train = history.history['loss']
+loss_val = history.history['val_loss']
+plt.plot(x, loss_train, 'g', label='Training loss')
+plt.plot(x, loss_val, 'b', label='validation loss')
+plt.title('Training and Validation loss')
+plt.xlabel('Epochs')
+plt.ylabel('Loss')
+plt.legend()
+plt.show()
 
+accuracy = history.history['accuracy']
+val_accuracy = history.history['val_accuracy']
 
-
-
-
-
-
-
-
-
-
-
-
-
+plt.plot(x, accuracy, 'r', label='Training accuracy')
+plt.plot(x, val_accuracy, 'y', label='validation accuracy')
+plt.title('Training and Validation accuracy')
+plt.xlabel('Epochs')
+plt.ylabel('Accuracy')
+plt.legend()
+plt.show()
