@@ -67,7 +67,7 @@ datagen = ImageDataGenerator(
 
 datagen.fit(x_train)
 
-history = classifier.fit(datagen.flow(x_train,y_train), epochs=10, batch_size=32,validation_data=(x_test,y_test))
+history = classifier.fit(datagen.flow(x_train,y_train), epochs=3, batch_size=32,validation_data=(x_test,y_test))
 
 
 
