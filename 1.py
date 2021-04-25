@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 
-dataset = pd.read_csv('/content/dataa/fer2013/fer2013.csv')
+dataset = pd.read_csv('fer2013.csv')
 
 y_train = dataset['emotion'].values
 x_train = dataset['pixels'].values
