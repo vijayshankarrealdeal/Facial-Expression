@@ -104,6 +104,8 @@ history = model.fit(
     callbacks=[learning_rate_reduction],
     steps_per_epoch=X_train.shape[0]//batch_size,
 )
+x = range(epochs)
+
 loss_train = history.history['loss']
 loss_val = history.history['val_loss']
 plt.plot(x, loss_train, 'g', label='Training loss')
