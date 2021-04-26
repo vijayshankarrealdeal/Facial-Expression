@@ -5,7 +5,7 @@
 ### - val_accuracy: 0.6573
 
 ![X](images/x.png?raw=true "X data")
-![X](images/y.png?raw=true "X data")
-![X](images/loss.png?raw=true "X data")
-![X](images/accu.png?raw=true "X data")
+![X](images/y.png?raw=true "Y data")
+![X](images/loss.png?raw=true "Loss")
+![X](images/accu.png?raw=true "Accu")
 
