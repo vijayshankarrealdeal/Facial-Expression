@@ -37,6 +37,7 @@ from keras.layers import Flatten
 from keras.optimizers import Adam
 from keras.layers import Dropout
 
+
 from keras.preprocessing.image import ImageDataGenerator
 from keras.callbacks import ReduceLROnPlateau 
 
