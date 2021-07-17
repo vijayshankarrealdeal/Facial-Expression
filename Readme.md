@@ -8,4 +8,4 @@
 ![X](images/y.png?raw=true "Y data")
 ![X](images/loss.png?raw=true "Loss")
 ![X](images/accu.png?raw=true "Accu")
-
+More changes will be updated soon....
